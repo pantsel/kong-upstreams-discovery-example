@@ -1,0 +1,20 @@
+---
+_format_version: '3.0'
+add-plugins:
+- selectors:
+  - "$..services[0]"
+  overwrite: false
+  plugins:
+    - name: route-by-header
+      config:
+        rules:
+        - upstream_name: eu.domain.com
+          condition:
+            location: eu
+        - upstream_name: us.domain.com
+          condition:
+            location: us
+        - upstream_name: ch.domain.com
+          condition:
+            location: ch
+      enabled: true

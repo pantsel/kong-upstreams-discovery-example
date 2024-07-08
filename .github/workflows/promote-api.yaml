@@ -1,0 +1,17 @@
+name: Promote API
+
+on:
+  workflow_call:
+    inputs:
+      openapi_spec:
+        description: "Path to the OpenAPI Specification file"
+        type: string
+        required: true
+
+jobs:
+  publish-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4

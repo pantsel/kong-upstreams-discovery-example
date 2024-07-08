@@ -1,0 +1,78 @@
+_format_version: "3.0"
+
+# If location needs to be extracted from the request body, we need to leverage a pre-function.
+# INCORPORATING REQ BODY INSPECTION FOR GEO-BASED PROXYING IS NOT ADVICED DUE TO THE FOLLOWING REASONS:
+# ============================================================================================
+# Performance Impact:
+# - Latency: Parsing and inspecting the request body for every incoming request 
+#   can significantly increase processing time, leading to higher latency.
+# - Resource Consumption: Analyzing request bodies requires more CPU and memory 
+#   resources compared to inspecting headers or query parameters, which are usually 
+#   smaller and simpler to parse.
+
+# Complexity:
+# - Implementation Complexity: Extracting location data from request bodies can 
+#   be complex due to varying content types (e.g., JSON, XML, form data) and structures.
+# - Error Handling: Handling different content types and structures increases the 
+#   likelihood of errors and the need for more robust error handling mechanisms.
+
+# Security Risks:
+# - Injection Attacks: Parsing the request body can expose your system to additional 
+#   security vulnerabilities, such as injection attacks if not handled correctly.
+# - DoS Attacks: Malicious users can craft large request bodies to exploit this mechanism, 
+#   leading to potential denial-of-service attacks by exhausting server resources.
+plugins:
+  - name: pre-function
+    config:
+      access:
+        - |
+          local req_body = kong.request.get_body()
+          if req_body then
+            local location = req_body.location
+            if location then
+              kong.service.request.set_header("location", location)
+            end
+          end
+
+
+services:
+  - name: test-service
+    url: http://eu.domain.com
+    routes:
+      - name: test-route
+        paths:
+          - ~/test$
+          - ~/(?<location>eu|us|ch)/test$
+    plugins:
+      - name: request-transformer-advanced
+        ordering:
+          before:
+            access:
+              - route-by-header
+        config:
+          add:
+            headers:
+              - location:$(uri_captures.location or query_params.location)
+      - name: route-by-header
+        config:
+          rules:
+          - upstream_name: eu.domain.com
+            condition:
+              location: eu
+          - upstream_name: us.domain.com
+            condition:
+              location: us
+          - upstream_name: ch.domain.com
+            condition:
+              location: ch
+
+upstreams:
+  - name: eu.domain.com
+    targets:
+      - target: svc-eu:80
+  - name: us.domain.com
+    targets:
+      - target: svc-us:80
+  - name: ch.domain.com
+    targets:
+      - target: svc-ch:80

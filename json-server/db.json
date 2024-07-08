@@ -1,0 +1,23 @@
+{
+    "locations": [
+        {
+            "id": 1,
+            "mock_url": "http://mock.petstore.api",
+            "upstreams": [ {
+                "location": "eu",
+                "upstream_name": "eu.domain.com",
+                "upstream_url": "svc-eu:80"
+            },
+            {
+                "location": "us",
+                "upstream_name": "us.domain.com",
+                "upstream_url": "svc-us:80"
+            },
+            {
+                "location": "ch",
+                "upstream_name": "ch.domain.com",
+                "upstream_url": "svc-ch:80"
+            }]
+        }
+    ]
+}

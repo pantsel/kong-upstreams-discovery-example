@@ -1,0 +1,10 @@
+upstreams:
+- name: eu.domain.com
+  targets:
+  - target: svc-eu:80
+- name: us.domain.com
+  targets:
+  - target: svc-us:80
+- name: ch.domain.com
+  targets:
+  - target: svc-ch:80
