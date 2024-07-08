@@ -13,7 +13,7 @@ python generate_upstreams.py --records-file records.json --key $SEARCH_KEY --out
 echo "Generating Route by Header Plugin"
 python generate-route-by-header-plugin.py --records-file records.json --key $SEARCH_KEY --output-file .staging/route-by-header.yaml 
 
-echo "Convertung OpenAPI to Kong"
+echo "Converting OpenAPI to Kong"
 cat openapi.yaml | deck file openapi2kong -o .staging/kong.yaml
 
 echo "Merging Upstreams to Kong state file"

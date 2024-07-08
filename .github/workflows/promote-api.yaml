@@ -12,6 +12,84 @@ jobs:
   publish-api:
     runs-on: ubuntu-latest
 
+    env:
+      LOCATIONS_REGISTRY_URL: http://localhost:3000
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      
+      - name: Debug
+        run: |
+          echo "OpenAPI Spec: ${{ inputs.openapi_spec }}"
+
+      - name: Get server from spec
+        id: get-server
+        run: |
+          echo "::set-output name=server::$(yq eval '.servers[0].url' ${{ inputs.openapi_spec }})"
+
+      - name: Fetch locations from $LOCATIONS_REGISTRY_URL/locations?mock_url=${{ steps.get-server.outputs.server }}
+        id: fetch-locations
+        run: |
+          curl -s "$LOCATIONS_REGISTRY_URL/locations?mock_url=${{ steps.get-server.outputs.server }}" | jq .[0] > locations.json
+          cat locations.json
+
+      - name: Generate upstreams from locations
+        id: generate-upstreams
+        run: |
+          #!/bin/bash
+          set -e
+
+          # Read locations.json and extract upstreams array
+          upstreams=$(jq -c '.upstreams' locations.json)
+
+          # Generate rules array
+          rules=$(echo "$upstreams" | jq -c '[.[] | {condition: {location: .location}, upstream_name: .upstream_name}]')
+
+          # Update plugins.json with new rules under route-by-header plugin
+          jq --argjson rules "$rules" \
+            '.["add-plugins"][0].plugins |= map(if .name == "route-by-header" then .config.rules = $rules else . end)' \
+            plugins/plugins.json > plugins.json
+
+          cat plugins.json
+
+      - name: Deck Ops
+        id: deck-ops
+        run: |
+            #!/bin/bash
+            set -e
+            
+            FIRST_UPSTREAM=$(jq -r '.upstreams[0].upstream_name' locations.json)
+
+            echo "Converting OpenAPI to Kong"
+            cat openapi.yaml | deck file openapi2kong -o kong.yaml
+            cat kong.yaml
+
+            echo "Merging Upstreams to Kong state file"
+            deck file merge kong.yaml upstreams.yaml -o kong.yaml
+            cat kong.yaml
+
+            echo "Adding Plugins to Kong state file"
+            cat kong.yaml | deck file add-plugins plugins.json -o kong.yaml
+            cat kong.yaml
+
+            echo "Patching Service host to $FIRST_UPSTREAM"
+            cat kong.yaml | deck file patch --selector="$..services[0]" --value='host:"'$FIRST_UPSTREAM'"' -o kong.yaml
+            cat kong.yaml
+
+            echo "Adding location based paths to Kong state file"
+            yq eval -i '
+            .services[].routes[].paths |= . + map(sub("^~", "~/(?<location>eu|us|ch)"))
+            ' kong.yaml
+
+            cat kong.yaml
+
+      - name: Validare Kong state file
+        id: validate-kong-state
+        run: |
+          deck file validate kong.yaml
+
+      - name: Sync Kong state file
+        id: sync-kong-state
+        run: |
+          deck gateway sync kong.yaml
