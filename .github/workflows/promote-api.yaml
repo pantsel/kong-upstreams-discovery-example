@@ -43,10 +43,24 @@ jobs:
           # Read locations.json and extract upstreams array
           upstreams=$(jq -c '.upstreams' locations.json)
 
-          # Generate rules array
-          rules=$(echo "$upstreams" | jq -c '[.[] | {condition: {location: .location}, upstream_name: .upstream_name}]')
+          # Create a new yaml file with upstreams
+          echo "upstreams:" > upstreams.yaml
+          echo "$upstreams" | jq -r '.[] | "  - name: \(.name)\n    targets:\n     - target: \(.target)"' >> upstreams.yaml
+          cat upstreams.yaml
 
-          # Update plugins.json with new rules under route-by-header plugin
+      - name: Prepare plugins
+        id: prepare-plugins
+        run: |
+          #!/bin/bash
+          set -e
+
+          # Read locations.json and extract upstreams array
+          upstreams=$(jq -c '.upstreams' locations.json)
+
+          # Generate rules array based on available upstreams
+          rules=$(echo "$upstreams" | jq -c '[.[] | {condition: {location: .location}, upstream_name: .name}]')
+
+          # Update route-by-header plugin with generated rules
           jq --argjson rules "$rules" \
             '.["add-plugins"][0].plugins |= map(if .name == "route-by-header" then .config.rules = $rules else . end)' \
             plugins/plugins.json > plugins.json
@@ -59,7 +73,7 @@ jobs:
             #!/bin/bash
             set -e
             
-            FIRST_UPSTREAM=$(jq -r '.upstreams[0].upstream_name' locations.json)
+            FIRST_UPSTREAM=$(jq -r '.upstreams[0].name' locations.json)
 
             echo "Converting OpenAPI to Kong"
             cat openapi.yaml | deck file openapi2kong -o kong.yaml
