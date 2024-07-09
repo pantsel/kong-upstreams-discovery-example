@@ -1,10 +1,10 @@
 upstreams:
-- name: eu.petsore.api
-  targets:
-  - target: svc-eu:80
-- name: us.petsore.api
-  targets:
-  - target: svc-us:80
-- name: ch.petsore.api
-  targets:
-  - target: svc-ch:80
+  - name: eu.petsore.api
+    targets:
+     - target: svc-eu:80
+  - name: us.petsore.api
+    targets:
+     - target: svc-us:80
+  - name: ch.petsore.api
+    targets:
+     - target: svc-ch:80

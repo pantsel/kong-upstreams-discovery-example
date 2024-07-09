@@ -1,0 +1,55 @@
+{
+  "_format_version": "3.0",
+  "add-plugins": [
+    {
+      "selectors": [
+        "$..services[0]"
+      ],
+      "overwrite": false,
+      "plugins": [
+        {
+          "name": "route-by-header",
+          "config": {
+            "rules": [
+              {
+                "condition": {
+                  "location": "eu"
+                },
+                "upstream_name": "eu.petsore.api"
+              },
+              {
+                "condition": {
+                  "location": "us"
+                },
+                "upstream_name": "us.petsore.api"
+              },
+              {
+                "condition": {
+                  "location": "ch"
+                },
+                "upstream_name": "ch.petsore.api"
+              }
+            ]
+          }
+        },
+        {
+          "name": "request-transformer-advanced",
+          "ordering": {
+            "before": {
+              "access": [
+                "route-by-header"
+              ]
+            }
+          },
+          "config": {
+            "add": {
+              "headers": [
+                "location:$(uri_captures.location or query_params.location)"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

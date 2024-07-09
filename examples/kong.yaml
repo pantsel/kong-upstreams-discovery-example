@@ -1,42 +1,75 @@
 _format_version: "3.0"
 services:
-- host: mock.api
-  id: 0a330bad-77d0-5bc4-a83f-a7cae478a9fd
-  name: swagger-petstore
-  path: /
-  plugins: []
-  port: 80
-  protocol: http
-  routes:
-  - id: 5ee17aac-24eb-5541-b03e-8eec6e6d17cb
-    methods:
-    - GET
-    name: swagger-petstore_listpets
-    paths:
-    - ~/pets$
-    plugins: []
-    regex_priority: 200
-    strip_path: false
+  - host: eu.petsore.api
+    id: 0a330bad-77d0-5bc4-a83f-a7cae478a9fd
+    name: swagger-petstore
+    path: /
+    plugins:
+      - config:
+          rules:
+            - condition:
+                location: eu
+              upstream_name: eu.petsore.api
+            - condition:
+                location: us
+              upstream_name: us.petsore.api
+            - condition:
+                location: ch
+              upstream_name: ch.petsore.api
+        name: route-by-header
+      - config:
+          add:
+            headers:
+              - location:$(uri_captures.location or query_params.location)
+        name: request-transformer-advanced
+        ordering:
+          before:
+            access:
+              - route-by-header
+    port: 80
+    protocol: http
+    routes:
+      - id: 5ee17aac-24eb-5541-b03e-8eec6e6d17cb
+        methods:
+          - GET
+        name: swagger-petstore_listpets
+        paths:
+          - ~/pets$
+          - ~/(?<location>eu|us|ch)/pets$
+        plugins: []
+        regex_priority: 200
+        strip_path: false
+        tags: []
+      - id: aa66b064-f026-504e-a6fc-6cea01506915
+        methods:
+          - POST
+        name: swagger-petstore_createpets
+        paths:
+          - ~/pets$
+          - ~/(?<location>eu|us|ch)/pets$
+        plugins: []
+        regex_priority: 200
+        strip_path: false
+        tags: []
+      - id: b8f5244a-0f93-5e0d-a7a4-762238d226c0
+        methods:
+          - GET
+        name: swagger-petstore_showpetbyid
+        paths:
+          - ~/pets/(?<petid>[^#?/]+)$
+          - ~/(?<location>eu|us|ch)/pets/(?<petid>[^#?/]+)$
+        plugins: []
+        regex_priority: 100
+        strip_path: false
+        tags: []
     tags: []
-  - id: aa66b064-f026-504e-a6fc-6cea01506915
-    methods:
-    - POST
-    name: swagger-petstore_createpets
-    paths:
-    - ~/pets$
-    plugins: []
-    regex_priority: 200
-    strip_path: false
-    tags: []
-  - id: b8f5244a-0f93-5e0d-a7a4-762238d226c0
-    methods:
-    - GET
-    name: swagger-petstore_showpetbyid
-    paths:
-    - ~/pets/(?<petid>[^#?/]+)$
-    plugins: []
-    regex_priority: 100
-    strip_path: false
-    tags: []
-  tags: []
-upstreams: []
+upstreams:
+  - name: eu.petsore.api
+    targets:
+      - target: svc-eu:80
+  - name: us.petsore.api
+    targets:
+      - target: svc-us:80
+  - name: ch.petsore.api
+    targets:
+      - target: svc-ch:80
