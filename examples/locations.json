@@ -1,0 +1,21 @@
+{
+  "id": 1,
+  "mock_url": "http://mock.petstore.api",
+  "upstreams": [
+    {
+      "location": "eu",
+      "name": "eu.petsore.api",
+      "target": "svc-eu:80"
+    },
+    {
+      "location": "us",
+      "name": "us.petsore.api",
+      "target": "svc-us:80"
+    },
+    {
+      "location": "ch",
+      "name": "ch.petsore.api",
+      "target": "svc-ch:80"
+    }
+  ]
+}
