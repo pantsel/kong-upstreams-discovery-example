@@ -116,3 +116,4 @@ jobs:
             upstreams.yaml
             plugins.json
             kong.yaml
+            locations.json
