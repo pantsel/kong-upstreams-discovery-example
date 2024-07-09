@@ -1,0 +1,61 @@
+_format_version: "3.0"
+
+services:
+- name: swagger-petstore
+  host: eu.petsore.api
+  port: 80
+  protocol: http
+  path: /
+  plugins:
+  - name: request-transformer-advanced
+    ordering:
+      before:
+        access:
+        - route-by-header
+    config:
+      add:
+        headers:
+        - location:$(uri_captures.location or query_params.location)
+  - name: route-by-header
+    config:
+      rules:
+      - condition:
+          location: eu
+        upstream_name: eu.petsore.api
+      - condition:
+          location: us
+        upstream_name: us.petsore.api
+      - condition:
+          location: ch
+        upstream_name: ch.petsore.api
+
+  routes:
+  - name: swagger-petstore_createpets
+    methods:
+    - POST
+    paths:
+    - ~/pets$
+    - ~/(?<location>eu|us|ch)/pets$
+  - name: swagger-petstore_listpets
+    methods:
+    - GET
+    paths:
+    - ~/pets$
+    - ~/(?<location>eu|us|ch)/pets$
+  - name: swagger-petstore_showpetbyid
+    methods:
+    - GET
+    paths:
+    - ~/pets/(?<petid>[^#?/]+)$
+    - ~/(?<location>eu|us|ch)/pets/(?<petid>[^#?/]+)$
+
+upstreams:
+- name: ch.petsore.api
+  targets:
+  - target: svc-ch:80
+- name: eu.petsore.api
+  targets:
+  - target: svc-eu:80
+- name: us.petsore.api
+  targets:
+  - target: svc-us:80

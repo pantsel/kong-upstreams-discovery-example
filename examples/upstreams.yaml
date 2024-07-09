@@ -1,10 +1,10 @@
 upstreams:
-- name: eu.domain.com
+- name: eu.petsore.api
   targets:
   - target: svc-eu:80
-- name: us.domain.com
+- name: us.petsore.api
   targets:
   - target: svc-us:80
-- name: ch.domain.com
+- name: ch.petsore.api
   targets:
   - target: svc-ch:80

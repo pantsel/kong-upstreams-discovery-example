@@ -28,7 +28,7 @@ jobs:
         run: |
           echo "::set-output name=server::$(yq eval '.servers[0].url' ${{ inputs.openapi_spec }})"
 
-      - name: Fetch locations from $LOCATIONS_REGISTRY_URL/locations?mock_url=${{ steps.get-server.outputs.server }}
+      - name: Fetch locations from $LOCATIONS_REGISTRY_URL for ${{ steps.get-server.outputs.server }}
         id: fetch-locations
         run: |
           curl -s "$LOCATIONS_REGISTRY_URL/locations?mock_url=${{ steps.get-server.outputs.server }}" | jq .[0] > locations.json
@@ -57,7 +57,7 @@ jobs:
           # Read locations.json and extract upstreams array
           upstreams=$(jq -c '.upstreams' locations.json)
 
-          # Generate rules array based on available upstreams
+          # Generate route-by-header plugin rules array based on available upstreams
           rules=$(echo "$upstreams" | jq -c '[.[] | {condition: {location: .location}, upstream_name: .name}]')
 
           # Update route-by-header plugin with generated rules
@@ -107,3 +107,12 @@ jobs:
         id: sync-kong-state
         run: |
           deck gateway sync kong.yaml
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: |
+            upstreams.yaml
+            plugins.json
+            kong.yaml
