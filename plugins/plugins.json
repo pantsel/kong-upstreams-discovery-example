@@ -25,7 +25,7 @@
                     "config": {
                         "add": {
                             "headers": [
-                                "location:$(uri_captures.location or query_params.location)"
+                                "location:$(uri_captures.location or query_params.location or headers.host:match(\"^(%w+)%.\"))"
                             ]
                         }
                     }
