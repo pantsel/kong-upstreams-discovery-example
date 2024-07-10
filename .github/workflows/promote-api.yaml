@@ -32,6 +32,8 @@ jobs:
         id: fetch-locations
         run: |
           curl -s "$LOCATIONS_REGISTRY_URL/locations?mock_url=${{ steps.get-server.outputs.server }}" | jq .[0] > locations.json
+
+          # Check examples/locations.json for resulting file structure
           cat locations.json
 
       - name: Generate Kong upstreams definitions
@@ -46,6 +48,8 @@ jobs:
           # Create a new yaml file with upstreams
           echo "upstreams:" > upstreams.yaml
           echo "$upstreams" | jq -r '.[] | "  - name: \(.name)\n    targets:\n     - target: \(.target)"' >> upstreams.yaml
+          
+          # Check examples/upstreams.yaml for resulting file structure
           cat upstreams.yaml
 
       - name: Prepare plugins
@@ -65,6 +69,7 @@ jobs:
             '.["add-plugins"][0].plugins |= map(if .name == "route-by-header" then .config.rules = $rules else . end)' \
             plugins/plugins.json > plugins.json
 
+          # Check examples/plugins.json for resulting file structure
           cat plugins.json
 
       - name: Deck Ops
@@ -96,9 +101,10 @@ jobs:
             .services[].routes[].paths |= . + map(sub("^~", "~/(?<location>eu|us|ch)"))
             ' kong.yaml
 
+            # Check examples/kong.yaml for resulting file structure
             cat kong.yaml
 
-      - name: Validare Kong state file
+      - name: Validate Kong state file
         id: validate-kong-state
         run: |
           deck file validate kong.yaml
