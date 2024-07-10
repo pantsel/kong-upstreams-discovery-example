@@ -1,7 +1,6 @@
 --artifact-server-path=.tmp
 --pull=false
 --action-offline-mode
---secret-file=act.secrets
 --container-architecture=linux/amd64
 --platform=ubuntu-latest=-self-hosted
 --network=host
