@@ -34,6 +34,8 @@ $ docker compose up -d
 
 ## Workflow
 
+> .github/workflows/promote-api.yaml
+
 ```mermaid
 graph TB;
     A[OAS]
