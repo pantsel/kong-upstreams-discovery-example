@@ -30,7 +30,7 @@ services:
   kong-migrations:
     networks:
       - kong-net
-    image: ${KONG_IMAGE}
+    image: ${KONG_IMAGE:-kong/kong-gateway:latest}
     container_name: kong-migrations
     depends_on:
       - postgres
@@ -46,7 +46,7 @@ services:
   kong-migrations-up:
     networks:
       - kong-net
-    image: ${KONG_IMAGE}
+    image: ${KONG_IMAGE:-kong/kong-gateway:latest}
     container_name: kong-migrations-up
     depends_on:
       - kong-migrations
@@ -62,7 +62,7 @@ services:
   kong-cp:
     networks:
       - kong-net
-    image: ${KONG_IMAGE}
+    image: ${KONG_IMAGE:-kong/kong-gateway:latest}
     container_name: kong-cp
     hostname: kong-cp
     user: kong
@@ -118,16 +118,16 @@ services:
       KONG_ANONYMOUS_REPORTS: "off"
       KONG_VITALS: "on"
       KONG_ENFORCE_RBAC: "off"
-      KONG_ADMIN_API_URI: ${KONG_ADMIN_API_URI}
+      KONG_ADMIN_API_URI: ${KONG_ADMIN_API_URI:-https://localhost:8001}
       KONG_ADMIN_SSL_CERT_KEY: "/srv/shared/ssl/server.key"
       KONG_ADMIN_SSL_CERT: "/srv/shared/ssl/server.crt"
-      KONG_ADMIN_GUI_URL: ${KONG_ADMIN_GUI_URL}
+      KONG_ADMIN_GUI_URL: ${KONG_ADMIN_GUI_URL:-https://localhost:8002}
       KONG_ADMIN_GUI_SSL_CERT_KEY: "/srv/shared/ssl/server.key"
       KONG_ADMIN_GUI_SSL_CERT: "/srv/shared/ssl/server.crt"
       KONG_PORTAL: "on"
       KONG_PORTAL_GUI_PROTOCOL: "http"
-      KONG_PORTAL_GUI_HOST: ${KONG_PORTAL_GUI_HOST}
-      KONG_PORTAL_API_URL: ${KONG_PORTAL_API_URL}
+      KONG_PORTAL_GUI_HOST: ${KONG_PORTAL_GUI_HOST:-localhost:8003}
+      KONG_PORTAL_API_URL: ${KONG_PORTAL_API_URL:-http://localhost:8003}
       KONG_PORTAL_AUTO_APPROVE: true
       KONG_PORTAL_EMAIL_VERIFICATION: "off"
       KONG_PORTAL_EMAILS_FROM: "kongtest@gmail.com"
@@ -144,7 +144,7 @@ services:
   kong-dp:
     networks:
       - kong-net
-    image: ${KONG_IMAGE}
+    image: ${KONG_IMAGE:-kong/kong-gateway:latest}
     container_name: kong-dp
     hostname: kong-dp
     depends_on:
@@ -176,7 +176,7 @@ services:
       KONG_PROXY_LISTEN: "0.0.0.0:8000, 0.0.0.0:8443 http2 ssl"
       # KONG_STREAM_LISTEN: "0.0.0.0:5555, 0.0.0.0:5556 ssl reuseport backlog=65536"
       KONG_STATUS_LISTEN: "0.0.0.0:8101"
-      KONG_PROXY_URI: ${KONG_PROXY_URI}
+      KONG_PROXY_URI: ${KONG_PROXY_URI:-http://localhost:8000}
       KONG_DATABASE: "off"
       KONG_ANONYMOUS_REPORTS: "off"
       KONG_VITALS: "on"
