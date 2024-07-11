@@ -96,7 +96,7 @@ services:
       KONG_ADMIN_GUI_LISTEN: "0.0.0.0:8002, 0.0.0.0:8445 http2 ssl"
       KONG_PORTAL_GUI_LISTEN: "0.0.0.0:8003, 0.0.0.0:8446 http2 ssl"
       KONG_PORTAL_API_LISTEN: "0.0.0.0:8004, 0.0.0.0:8447 http2 ssl"
-      KONG_STATUS_LISTEN: "0.0.0.0:8100 http2"
+      KONG_STATUS_LISTEN: "0.0.0.0:8100"
       KONG_CLUSTER_LISTEN: "0.0.0.0:8005"
       KONG_DATABASE: postgres
       KONG_PG_HOST: postgres
