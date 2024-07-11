@@ -118,10 +118,10 @@ services:
       KONG_ANONYMOUS_REPORTS: "off"
       KONG_VITALS: "on"
       KONG_ENFORCE_RBAC: "off"
-      KONG_ADMIN_API_URI: ${KONG_ADMIN_API_URI:-https://localhost:8001}
+      KONG_ADMIN_API_URI: ${KONG_ADMIN_API_URI:-http://localhost:8001}
       KONG_ADMIN_SSL_CERT_KEY: "/srv/shared/ssl/server.key"
       KONG_ADMIN_SSL_CERT: "/srv/shared/ssl/server.crt"
-      KONG_ADMIN_GUI_URL: ${KONG_ADMIN_GUI_URL:-https://localhost:8002}
+      KONG_ADMIN_GUI_URL: ${KONG_ADMIN_GUI_URL:-http://localhost:8002}
       KONG_ADMIN_GUI_SSL_CERT_KEY: "/srv/shared/ssl/server.key"
       KONG_ADMIN_GUI_SSL_CERT: "/srv/shared/ssl/server.crt"
       KONG_PORTAL: "on"
